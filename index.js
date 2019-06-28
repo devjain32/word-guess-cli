@@ -1,8 +1,8 @@
 var inquirer = require("inquirer")
 var words = ["bears", "beets", "wuphf", "dundies", "tuna", "flonkerton", "scarn", "cornell"];
-var indexArr = 1;
+var indexArr = Math.floor(Math.random() * words.length);
 var letterArr;
-var numberWrong = 3;
+var numberWrong = 4;
 var withoutBlanks;
 var withBlanks = [];
 var guess;
@@ -20,79 +20,101 @@ inquirer
     ]).then(function (response) {
         if (response.ready) {
             console.log("There will be a randomly chosen word from the Office and you have three tries to guess it. Good luck!")
-            next();
+            startGame();
         }
         else {
             console.log("Oh no!")
         }
-        function next() {
-            inquirer
-                .prompt([
-                    {
-                        message: "Guess a letter!",
-                        type: "input",
-                        name: "letter"
-                    }
-                ]).then(function (response) {
-                    guess = response.letter
-                    makeWord();
-                })
-        }
+    });
 
-
-
-
-        function makeWord() { //generates a random word from the array and 
-            //word = words[Math.floor(Math.random() * words.length)];
-            letterArr = words[indexArr].split("");
-            console.log(letterArr)
-            withoutBlanks = letterArr.join(" ");
-            makeBlanks();
-        }
-
-        function makeBlanks() {
-            for (var i = 0; i < letterArr.length; i++) {
-                withBlanks.push("_");
+    
+function next() {
+    inquirer
+        .prompt([
+            {
+                message: "Guess a letter!",
+                type: "input",
+                name: "letter"
             }
-            console.log(withBlanks.join(" "))
+        ]).then(function (response) {
+            guess = response.letter
             checker();
+        })
+}
+
+
+function startGame() {
+    letterArr = words[indexArr].split("");
+    withoutBlanks = letterArr.join(" ");
+    for (var i = 0; i < letterArr.length; i++) {
+        withBlanks.push("_");
+    }
+    console.log(withBlanks.join(" "))
+    if (guess) {
+        checker();
+    }
+    else {
+        next();
+    }
+}
+
+function checker() {
+    var status = 0;
+    for (var i = 0; i < letterArr.length; i++) {
+        if (guess === letterArr[i]) {
+            status++;
         }
-
-        function checker() {
-            var status = 0;
-            for (var i = 0; i < letterArr.length; i++) {
-                if (guess === letterArr[i]) {
-                    status++;
-                }
-            }
-            if (status === 0) {
-                numberWrong--;
-                if (numberWrong === 1) {
-                    console.log("Incorrect! You have " + numberWrong + " guess remaining.")
-                }
-                else {
-                    console.log("Incorrect! You have " + numberWrong + " guesses remaining.")
-
-                }
-                next();
-
-            }
-            else {
-                console.log("correct!")
-                populate();
-            }
-        }
-
-        function populate() {
-            for (var j = 0; j < withBlanks.length; j++) {
-                if (letterArr[j] === guess) {
-                    withBlanks[j] = guess;
-                }
-            }
-            console.log(withBlanks)
+    }
+    if (status === 0) {
+        numberWrong--;
+        if (numberWrong === 1) {
+            console.log("Incorrect! You have " + numberWrong + " guess remaining.");
             next();
         }
-    })
+        else if (numberWrong >= 1) {
+            console.log("Incorrect! You have " + numberWrong + " guesses remaining.");
+            next();
+
+        }
+        else if (numberWrong === 0) {
+            console.log("Game over! You have 0 guesses remaining. The word was " + withoutBlanks);
+            gameOver();
+        }
+    }
+    else {
+        console.log("correct!")
+        populate();
+    }
+}
+
+function populate() {
+    for (var j = 0; j < withBlanks.length; j++) {
+        if (letterArr[j] === guess) {
+            withBlanks[j] = guess;
+        }
+    }
+    console.log(withBlanks.join(" "))
+    var statusBlanks = 0;
+    var statusLetters = 0;
+    for (var k = 0 ; k < withBlanks.length ; k++) {
+        if (letterArr[k] === "_") {
+            statusBlanks++;
+        }
+        else if (letterArr[k] !== "_") {
+            statusLetters++;
+        }
+    }
+    if (statusBlanks >= 0) {
+        next();
+    }
+    else if (statusBlanks === 0) {
+        gameOver();
+    }
+}
+
+function gameOver() {
+    console.log("Thank you for playing!")
+}
 
 //when started, randomly generate word from array and show it with blanks
 //get letter that user inputs
